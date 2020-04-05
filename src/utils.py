@@ -29,6 +29,15 @@ set_font('./STFANGSO.TTF')   # for displaying Chinese characters in plots
 def use_chn():
     return _CHN_FONT_ is None
 
+def fix_jhs_cvs_changes(df):
+  changed_dict = {'Province/State': ['Province/State', 'Province_State'], 
+                  'Country/Region': ['Country/Region', 'Country_Region'],
+                  'Last Update': ['Last Update', 'Last_Update'] ,
+                  }
+  for col, opts in changed_dict.items():
+    df[col] = df[opts].bfill(axis=1).iloc[:, 0]
+  
+  return df
 
 def load_jhs_raw(verbose=False):
     dr = pd.date_range(_JHS_DATA_START_DATE, datetime.date.today())
@@ -43,6 +52,7 @@ def load_jhs_raw(verbose=False):
             continue
         
     out = pd.concat(frm_list, sort=False).drop_duplicates()
+    out = fix_jhs_cvs_change(out)
     rename_dict = {'Province/State': 'province/state', 
                   'Country/Region': 'country/region',
                   'Confirmed': 'cum_confirmed',
